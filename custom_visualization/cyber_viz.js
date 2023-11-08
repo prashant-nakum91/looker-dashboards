@@ -37,10 +37,9 @@ looker.plugins.visualizations.add({
   },
 
   updateAsync: function(data, element, config, queryResponse, details, done) {
-    var hashcolumn = queryResponse.fields.measure_like[0].name;
+    var threatcolumn = queryResponse.fields.measure_like[0].name
     // Calculate the count value from the data
     const count = data.length;
-
     let list=[]
     let list1=[]
     for (var i of queryResponse.fields.measures) {
@@ -52,45 +51,48 @@ looker.plugins.visualizations.add({
         list1.push(row[key].value);
       });
     });
-
     // Calculate the percentage value based on the available count
     const estimatedTotalItems = 100;
-    const ioc_value = count ? data[0][hashcolumn].value:0;
-    var ioc1_value = 0;
+    const threat_count = count ? data[0][threatcolumn].value:0;
+    var threat1_count = 0;
     if (count != 1) {
-        ioc1_value = count ? data[1][hashcolumn].value:0;
+        threat1_count = count ? data[1][threatcolumn].value:0;
     }
-    const ioc_count_difference = ioc_value - ioc1_value;
+    const threat_count_difference = threat_count - threat1_count;
     var percentage = 0;
     if (count != 1) {
-        percentage = count ? Math.trunc((ioc_count_difference / ioc1_value) * estimatedTotalItems):0;
+        percentage = count ? Math.trunc((threat_count_difference / threat1_count) * estimatedTotalItems):0;
     }
     const arrowIcon = percentage > 0 ? '➚' : '➘';
 
-    // Determine the color based on the ioc count
     var color;
-    if (ioc_value <= 0) {
+    if (percentage <= 0) {
       color = 'green';
-    } else if (ioc_value >= 1 && ioc_value <= 100) {
-      color = 'orange';
-    } else {
-      color = 'red'; // Default color
     }
-
+    else {
+      color = 'red';
+    }
+    percentage = (percentage == 0)?'N/A':percentage+'%'
     // Display the count and percentage value in the container
     this.container.innerHTML = `
       <div style="display: flex; align-items: center;">
-        <div style="font-size: 60px; font-family: Arial, Helvetica, sans-serif; color: ${color};">${ioc_value}</div>
+        <div style="font-size: 60px; font-family: Arial, Helvetica, sans-serif;">${threat_count}</div>
         <div style="display: flex; flex-direction: column; align-items: flex-start;">
           <div style="font-size: 30px; font-family: Arial, Helvetica, sans-serif; color: ${color};">${arrowIcon}</div>
-          <div style="font-size: 20px; font-family: Arial, Helvetica, sans-serif; text-align: right; color: ${color};">${percentage}%</div>
+          <div style="font-size: 20px; text-align: right; font-family: Arial, Helvetica, sans-serif; color: ${color};">${percentage}</div>
         </div>
       </div>
     `;
 
+    // Display the text line below the count value
+    this.textContainer.textContent = "Today vs Yesterday";
+    this.textContainer.style.fontSize = "12px";
+    this.textContainer.style.fontFamily = "Arial, Helvetica, sans-serif";
+
     // Extract data from Looker's query response
     var labels = [];
     var datasets = [];
+
     var xField = queryResponse.fields.dimension_like[0].name;
     var yField = queryResponse.fields.measure_like[0].name;
 
@@ -114,7 +116,7 @@ looker.plugins.visualizations.add({
             label: null,
             data: datasets,
             fill: false,
-            borderColor: 'rgb(0, 0, 0)',
+            borderColor: color,
             pointRadius: 0,
             tension: 0.1
           }],
