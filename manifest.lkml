@@ -1,7 +1,7 @@
 project_name: "dataminr"
 
 constant: CHRONICLE_URL{
-  value: "https://crestdatasys.backstory.chronicle.security"
+  value: "https://www.google.com"
   export: override_required
 }
 
