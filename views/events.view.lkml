@@ -313,18 +313,18 @@ view: events {
     group_item_label: "Log Type"
   }
   dimension: metadata__product_deployment_id {
-    type: string
+    type: number
     sql: ${TABLE}.metadata.product_deployment_id ;;
     group_label: "Metadata"
     group_item_label: "Product Deployment ID"
   }
   dimension: metadata__product_event_type {
-    type: number
+    type: string
     sql: ${TABLE}.metadata.product_event_type ;;
     group_label: "Metadata"
     group_item_label: "Product Event Type"
   }
-  dimension: metadata__productd {
+  dimension: metadata__product_log_id {
     type: string
     sql: ${TABLE}.metadata.product_log_id ;;
     group_label: "Metadata"
